@@ -1,0 +1,6 @@
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\obj\Debug\ResolveAssemblyReference.cache
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\bin\Debug\Nasa8x.Core.FileManager.dll
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\bin\Debug\Nasa8x.Core.FileManager.pdb
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\bin\Debug\ICSharpCode.SharpZipLib.dll
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\obj\Debug\Nasa8x.Core.FileManager.dll
+D:\Projects\Nasa8x\FlexExplorer\Nasa8x.Core.FileManager\obj\Debug\Nasa8x.Core.FileManager.pdb
