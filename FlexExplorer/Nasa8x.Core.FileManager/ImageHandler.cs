@@ -1,27 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Web;
 
 namespace Nasa8x.Core.FileManager
 {
     public class ImageHandler : IHttpHandler
     {
-        private static string UploadPath
-        {
-            get { return ConfigurationManager.AppSettings["UPLOAD_PATH"]; }
-        }
 
-        private static string CachePath
-        {
-            get { return ConfigurationManager.AppSettings["CACHE_PATH"]; }
-        }
+        //private static string AppPath
+        //{
+        //    get { return ConfigurationManager.AppSettings["APP_PATH"]; }
+        //}
+
+        //private static string UploadPath
+        //{
+        //    get { return string.Format("{0}{1}",AppPath,ConfigurationManager.AppSettings["UPLOAD_PATH"]) Path.Combine(AppPath, ); }
+        //}
+
+        //private static string CachePath
+        //{
+        //    get { return Path.Combine(AppPath,ConfigurationManager.AppSettings["CACHE_PATH"]); }
+        //}
 
 
         private static DateTime ConvertTimestamp(double timestamp)
@@ -51,10 +54,18 @@ namespace Nasa8x.Core.FileManager
 
             if (double.TryParse(_f, out _date))
             {
-                string _subPhotoPath = ConvertTimestamp(_date).ToString("/yyyy/MM/dd");
+                string _subPhotoPath = ConvertTimestamp(_date).ToString("yyyy/MM/dd");
 
-                return Path.Combine(_subPhotoPath, _photoName);
+                //var _p = new string[] {UploadPath, _subPhotoPath, _photoName};
+               return Path.Combine(FileHelpers.UploadPath,_subPhotoPath, _photoName);
+                
+
+                //Logging.Log(p);
+                //return p;
             }
+
+            if (!string.IsNullOrWhiteSpace(FileHelpers.AppPath))
+                return FileHelpers.PathCombine(FileHelpers.AppPath,_photoName);
 
             return _photoName;
 
@@ -167,7 +178,8 @@ namespace Nasa8x.Core.FileManager
             }
 
 
-            string cachePath = context.Server.MapPath(UploadPath + filePath);// Path.Combine(UploadPath, filePath);
+            //string cachePath = context.Server.MapPath(UploadPath + filePath);// Path.Combine(UploadPath, filePath);
+            string cachePath = context.Server.MapPath(filePath);// Path.Combine(UploadPath, filePath);
 
             var _size = GetSize(context);
 
@@ -188,7 +200,7 @@ namespace Nasa8x.Core.FileManager
 
                 _s += !string.IsNullOrEmpty(_x) ? "xGreyscale" + _x : string.Empty;
 
-                cachePath = context.Server.MapPath(CachePath + filePath.Insert(filePath.LastIndexOf("."), _s));
+                cachePath = context.Server.MapPath(FileHelpers.CachePath + filePath.Insert(filePath.LastIndexOf("."), _s));
             }
 
 
@@ -205,7 +217,8 @@ namespace Nasa8x.Core.FileManager
             if (imageData == null)
             {
 
-                var _source = context.Server.MapPath(UploadPath+ filePath);
+                //var _source = context.Server.MapPath(UploadPath+ filePath);
+                var _source = context.Server.MapPath(filePath);
                 ImageHelpers.ResizeImage(_source, cachePath, _size);
                 imageData = FileHelpers.Read(cachePath);
 

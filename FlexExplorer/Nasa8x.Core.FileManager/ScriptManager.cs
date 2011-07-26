@@ -7,6 +7,7 @@ using System.Net;
 using System.Security.Principal;
 using System.Text;
 using System.Web;
+using System.Web.Security;
 using System.Web.SessionState;
 
 namespace Nasa8x.Core.FileManager
@@ -14,7 +15,7 @@ namespace Nasa8x.Core.FileManager
     public class ScriptManager : IHttpHandler, IRequiresSessionState
     {
 
-        private const string SESSION_ID = "SESSIONID";
+        private const string SESSION_ID = "sessionId";
 
         private static NameValueCollection _fileTypes;
         public static NameValueCollection FileTypes
@@ -36,21 +37,11 @@ namespace Nasa8x.Core.FileManager
                                                        });
             }
         }
-
-        //private static string IconPath
-        //{
-        //    get
-        //    {
-        //        return ConfigurationManager.AppSettings["ICON_PATH"];
-        //    }
-        //}
+        
 
         private static string UploadPath
         {
-            get
-            {
-                return ConfigurationManager.AppSettings["UPLOAD_PATH"];
-            }
+            get { return FileHelpers.UploadPath; }
         }
 
 
@@ -68,65 +59,69 @@ namespace Nasa8x.Core.FileManager
             var path = context.Request["path"];
             var input = context.Request["input"];
 
-            string _encryptString = context.Request.QueryString[SESSION_ID];
+            string _encryptString = context.Request[SESSION_ID];
 
-            try
+            FormsAuthenticationTicket _userTicket = FormsAuthentication.Decrypt(_encryptString);
+
+            if (!_userTicket.Expired)
             {
-
-
-                switch (action)
+                try
                 {
-                    case "folder":
-                    case "files":
-                    case "search":
 
-                        FetchItems(path, context);
 
-                        break;
+                    switch (action)
+                    {
+                        case "folder":
+                        case "files":
+                        case "search":
 
-                    case "upload":
-                        UploadFile(context);
-                        break;
+                            FetchItems(path, context);
 
-                    case "del":
-                        var _items = context.Request["items"].Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        FileHelpers.Delete(_items);
+                            break;
 
-                        break;
+                        case "upload":
+                            UploadFile(context);
+                            break;
 
-                    case "newdir":
-                        //var _n = context.Request["newname"];
-                        FileHelpers.CreateFolder(input, path);
-                        break;
+                        case "del":
+                            var _items = context.Request["items"].Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            FileHelpers.Delete(_items);
 
-                    case "rename":
+                            break;
 
-                        //var _n2 = context.Request["newname"];
-                        var _old = context.Request["oldname"];
-                        FileHelpers.ReNameFileOrFolder(_old, input);
+                        case "newdir":
+                            //var _n = context.Request["newname"];
+                            FileHelpers.CreateFolder(input, path);
+                            break;
 
-                        break;
+                        case "rename":
 
-                    case "move":
-                        bool _overwrite;
-                        bool.TryParse(context.Request["overwrite"], out _overwrite);
-                        var _itemsMove = context.Request["items"].Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        FileHelpers.Move(_itemsMove, path, _overwrite);
+                            //var _n2 = context.Request["newname"];
+                            var _old = context.Request["oldname"];
+                            FileHelpers.ReNameFileOrFolder(_old, input);
 
-                        break;
+                            break;
+
+                        case "move":
+                            bool _overwrite;
+                            bool.TryParse(context.Request["overwrite"], out _overwrite);
+                            var _itemsMove = context.Request["items"].Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            FileHelpers.Move(_itemsMove, path, _overwrite);
+
+                            break;
+
+
+                    }
 
 
                 }
+                catch (Exception ex)
+                {
+                    Logging.Log(action + ": " + ex);
 
-
+                    throw new InvalidOperationException(ex.ToString());
+                }
             }
-            catch (Exception ex)
-            {
-                Logging.Log(action + ": " + ex);
-
-                throw new InvalidOperationException(ex.ToString());
-            }
-
 
             context.Response.Flush();
 
@@ -180,7 +175,7 @@ namespace Nasa8x.Core.FileManager
 
             foreach (var _fileItem in _items)
             {
-                
+
                 string _icon = "none.gif";
 
                 string _itemType = "none";
@@ -199,7 +194,7 @@ namespace Nasa8x.Core.FileManager
                 }
                 if (_fileItem.IsExistsIcon)
                 {
-                    _icon = string.Format("{0}.gif", _fileItem.Extension.Replace(".",""));
+                    _icon = string.Format("{0}.gif", _fileItem.Extension.Replace(".", ""));
 
                 }
 
@@ -244,8 +239,8 @@ namespace Nasa8x.Core.FileManager
 
 
                     string _uploadPath = _autoNameAndPath
-                                             ? Path.Combine(UploadPath, DateTime.UtcNow.ToString("yyyy/MM/dd"))
-                                             : Path.Combine(UploadPath, _uploadToPath);
+                                             ? FileHelpers.PathCombine(UploadPath,DateTime.UtcNow.ToString("yyyy/MM/dd"))
+                                             : FileHelpers.PathCombine(UploadPath, _uploadToPath);
 
                     _uploadPath = context.Server.MapPath(_uploadPath);
 
@@ -306,7 +301,7 @@ namespace Nasa8x.Core.FileManager
 
                             }
 
-                            System.Threading.Thread.Sleep(100);
+                            System.Threading.Thread.Sleep(150);
 
 
                         }// en loop
