@@ -15,6 +15,8 @@ namespace Nasa8x.Core.FileManager
     public class ScriptManager : IHttpHandler, IRequiresSessionState
     {
 
+        public static HttpContext Context;
+
         private const string SESSION_ID = "sessionId";
 
         private static NameValueCollection _fileTypes;
@@ -44,12 +46,32 @@ namespace Nasa8x.Core.FileManager
             get { return FileHelpers.UploadPath; }
         }
 
+        private static bool Debug
+        {
+            get { return bool.Parse(ConfigurationManager.AppSettings["DEBUG"]); }
+        }
 
-        private static double getTimeStamp()
+        private static bool AllowAction
+        {
+            get
+            {
+                if(!Debug)
+                {
+                    string _encryptString = Context.Request[SESSION_ID];
+                    FormsAuthenticationTicket _userTicket = FormsAuthentication.Decrypt(_encryptString);
+
+                    return !_userTicket.Expired;
+                }
+
+                return true;
+            }
+        }
+            
+      /*  private static double getTimeStamp()
         {
 
-            return Utils.ConvertToUnixTimestamp(DateTime.UtcNow);
-        }
+            return DateTime.UtcNow.Ticks;
+        }*/
 
 
         public void ProcessRequest(HttpContext context)
@@ -59,11 +81,9 @@ namespace Nasa8x.Core.FileManager
             var path = context.Request["path"];
             var input = context.Request["input"];
 
-            string _encryptString = context.Request[SESSION_ID];
+            Context = context;
 
-            FormsAuthenticationTicket _userTicket = FormsAuthentication.Decrypt(_encryptString);
-
-            if (!_userTicket.Expired)
+          //  if (AllowAction)
             {
                 try
                 {
@@ -257,7 +277,7 @@ namespace Nasa8x.Core.FileManager
 
 
                         context.Response.Write(string.Join(";", (from _s in _urls
-                                                                 let _fileName = string.Format("{0}{1}", getTimeStamp(), ".jpg")
+                                                                 let _fileName = string.Format("{0}{1}", DateTime.UtcNow.Ticks, ".jpg")
                                                                  where Download(_s, Path.Combine(_uploadPath, _fileName))
                                                                  select _fileName).ToArray()));
 
@@ -278,7 +298,7 @@ namespace Nasa8x.Core.FileManager
 
                             if (_uploadFile.ContentLength > 0)
                             {
-                                _fileName = string.Format("{0}{1}", getTimeStamp(), _fileExt);// DateTime.UtcNow.ToString("yyyy-MM-ddxHHmmss") + DateTime.UtcNow.Millisecond + _fileExt;
+                                _fileName = string.Format("{0}{1}", DateTime.UtcNow.Ticks, _fileExt);// DateTime.UtcNow.ToString("yyyy-MM-ddxHHmmss") + DateTime.UtcNow.Millisecond + _fileExt;
 
                                 string _outPath = Path.Combine(_uploadPath, _fileName);
 

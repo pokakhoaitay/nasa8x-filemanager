@@ -27,10 +27,10 @@ namespace Nasa8x.Core.FileManager
         //}
 
 
-        private static DateTime ConvertTimestamp(double timestamp)
+       /* private static DateTime ConvertTimestamp(double timestamp)
         {
-            return Utils.ConvertFromUnixTimestamp(timestamp);
-        }
+            return Convert.ToDateTime(timestamp);// Utils.ConvertFromUnixTimestamp(timestamp);
+        }*/
 
 
         private static string GetFilePath(HttpContext context)
@@ -46,15 +46,15 @@ namespace Nasa8x.Core.FileManager
 
             var _f = _photoName.Substring(0, _photoName.IndexOf("."));
 
-            double _date;
+            long _date;
 
 
-            double.TryParse(_f, out _date);
+            long.TryParse(_f, out _date);
 
 
-            if (double.TryParse(_f, out _date))
+            if (long.TryParse(_f, out _date))
             {
-                string _subPhotoPath = ConvertTimestamp(_date).ToString("yyyy/MM/dd");
+                string _subPhotoPath = new DateTime(_date).ToString("yyyy/MM/dd");
 
                 //var _p = new string[] {UploadPath, _subPhotoPath, _photoName};
                return Path.Combine(FileHelpers.UploadPath,_subPhotoPath, _photoName);

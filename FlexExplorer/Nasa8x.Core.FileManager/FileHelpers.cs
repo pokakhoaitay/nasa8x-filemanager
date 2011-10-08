@@ -31,7 +31,7 @@ namespace Nasa8x.Core.FileManager
 
             }
         }
-      
+
         public static string UploadPath
         {
             get
@@ -53,7 +53,7 @@ namespace Nasa8x.Core.FileManager
 
             }
         }
-        
+
 
 
         private static string IconPath
@@ -65,40 +65,40 @@ namespace Nasa8x.Core.FileManager
         }
 
 
-        public static string PathCombine(string a,string b)
+        public static string PathCombine(string a, string b)
         {
-            return string.Format("{0}/{1}",a,b).Replace("//", "/");
+            return string.Format("{0}/{1}", a, b).Replace("//", "/");
         }
 
-        public static string RelativePath(string _fullPath,bool isFolder)
+        public static string RelativePath(string _fullPath, bool isFolder)
         {
             string _appFullPath = !String.IsNullOrEmpty(AppPath) ? Context.Server.MapPath(AppPath) : Context.Request.PhysicalApplicationPath;//  Context.Server.MapPath("/");
 
-            if(isFolder)
+            if (isFolder)
             {
                 _appFullPath = Context.Server.MapPath(UploadPath);
             }
-           
+
             return _fullPath.Replace(_appFullPath, "/").Replace("\\", "/");
 
-           /* if(ImageHelpers.IsGraphic(_fullPath))
-            {
-                string _appFullPath = !String.IsNullOrEmpty(AppPath) ? Context.Server.MapPath(AppPath) : Context.Request.PhysicalApplicationPath;//  Context.Server.MapPath("/");
-                //string _appFullPath =  Context.Request.PhysicalApplicationPath;//  Context.Server.MapPath("/");
-                string _path = _fullPath.Replace(_appFullPath, "/").Replace("\\", "/");
-                return _path;      
-            }
-            else
-            {
+            /* if(ImageHelpers.IsGraphic(_fullPath))
+             {
+                 string _appFullPath = !String.IsNullOrEmpty(AppPath) ? Context.Server.MapPath(AppPath) : Context.Request.PhysicalApplicationPath;//  Context.Server.MapPath("/");
+                 //string _appFullPath =  Context.Request.PhysicalApplicationPath;//  Context.Server.MapPath("/");
+                 string _path = _fullPath.Replace(_appFullPath, "/").Replace("\\", "/");
+                 return _path;      
+             }
+             else
+             {
 
-                string _appFullPath = Context.Server.MapPath(AppPath);
-                return _fullPath.Replace(_appFullPath, "/").Replace("\\", "/");
+                 string _appFullPath = Context.Server.MapPath(AppPath);
+                 return _fullPath.Replace(_appFullPath, "/").Replace("\\", "/");
 
                 
-            }*/
+             }*/
 
 
-          
+
 
         }
 
@@ -145,7 +145,7 @@ namespace Nasa8x.Core.FileManager
             // if (IsRemoveAppPath)
             _path = Context.Server.MapPath(PathCombine(UploadPath, _path));
 
-           
+
             var _list = new List<FileItem>();
 
             if (Directory.Exists(_path))
@@ -163,7 +163,7 @@ namespace Nasa8x.Core.FileManager
                         var _item = new FileItem();
                         var _dir = new DirectoryInfo(_f);
                         _item.Name = _dir.Name;
-                        _item.FullName = RelativePath(_dir.FullName,true);
+                        _item.FullName = RelativePath(_dir.FullName, true);
                         _item.Created = _dir.CreationTimeUtc;
                         _item.FileCount = _dir.GetFiles().LongLength;
                         _item.SubFolderCount = _dir.GetDirectories().LongLength;
@@ -181,10 +181,10 @@ namespace Nasa8x.Core.FileManager
 
                     //string[] _files = Directory.GetFiles(_path, _searchTxt, _searchSubFolder?SearchOption.AllDirectories:SearchOption.TopDirectoryOnly);
 
-                    var _files = Directory.EnumerateFiles(_path, _searchTxt,_searchSubFolder? SearchOption.AllDirectories: SearchOption.TopDirectoryOnly);
+                    var _files = Directory.EnumerateFiles(_path, _searchTxt, _searchSubFolder ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
-                    if(_extensions!=null && _extensions.Length>0)
-                          _files =  _files.Where(s => _extensions.Any(ext => Path.GetExtension(s)!=null && ext.ToLower() == Path.GetExtension(s).ToLower())).ToList();
+                    if (_extensions != null && _extensions.Length > 0)
+                        _files = _files.Where(s => _extensions.Any(ext => Path.GetExtension(s) != null && ext.ToLower() == Path.GetExtension(s).ToLower())).ToList();
 
 
                     foreach (string _f in _files)
@@ -193,7 +193,7 @@ namespace Nasa8x.Core.FileManager
                         var _item = new FileItem();
                         var _file = new FileInfo(_f);
                         _item.Name = _file.Name;
-                        _item.FullName = RelativePath(_file.FullName,false);
+                        _item.FullName = RelativePath(_file.FullName, false);
                         _item.Created = _file.CreationTimeUtc;
                         _item.LastAccessDate = _file.LastAccessTimeUtc;
                         _item.LastWriteDate = _file.LastWriteTimeUtc;
@@ -260,10 +260,10 @@ namespace Nasa8x.Core.FileManager
         #region Create Folder
         public static bool CreateFolder(string _name, string _currentPath)
         {
-           // string _path = _currentPath + "/" + _name;
+            // string _path = _currentPath + "/" + _name;
 
 
-            string  _path = UploadPath + _currentPath+"/"+_name;
+            string _path = UploadPath + _currentPath + "/" + _name;
 
 
             _path = Context.Server.MapPath(_path);
@@ -409,8 +409,8 @@ namespace Nasa8x.Core.FileManager
                 if (_item != _destination)
                 {
                     string _itemPath = _item;
-                   
-                        _itemPath = UploadPath + _item;
+
+                    _itemPath = UploadPath + _item;
 
 
                     _itemPath = Context.Server.MapPath(_itemPath);
@@ -446,8 +446,8 @@ namespace Nasa8x.Core.FileManager
                 foreach (string _item in _items)
                 {
                     string _path = _item;
-             
-                        _path = UploadPath + _item;
+
+                    _path = PathCombine(AppPath, _item);
                     _path = Context.Server.MapPath(_path);
                     if (Directory.Exists(_path))
                     {
@@ -509,9 +509,9 @@ namespace Nasa8x.Core.FileManager
             string[] _items = _filesOrFolders.Split('|');
 
 
-            
-                _destination = UploadPath + _destination;
-          
+
+            _destination = UploadPath + _destination;
+
 
             string _currentF = Context.Server.MapPath(_destination) + "\\";
 
@@ -522,8 +522,8 @@ namespace Nasa8x.Core.FileManager
 
 
                 string _itemPath = _item;
-              
-                    _itemPath = UploadPath + _item;
+
+                _itemPath = UploadPath + _item;
 
                 string _path = Context.Server.MapPath(_itemPath);
 
@@ -553,7 +553,7 @@ namespace Nasa8x.Core.FileManager
             return File.Exists(filePath) ? File.ReadAllBytes(filePath) : null;
         }
 
-       
-        
+
+
     }
 }
